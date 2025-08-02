@@ -97,3 +97,8 @@ temp/
 # Replit specific files (not needed for external deployment)
 .replit
 replit.nix
+
+# Additional exclusions for clean export
+.env*
+dist/
+node_modules/
