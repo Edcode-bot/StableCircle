@@ -1,15 +1,19 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { walletService } from '@/lib/wallet';
+import { celoWalletService } from '@/lib/celo';
 import { useToast } from '@/hooks/use-toast';
+import { APP_CONFIG } from '@/config/constants';
 
 interface WalletContextType {
   isConnected: boolean;
   address: string | null;
-  balance: string | null;
+  cUSDBalance: string | null;
+  celoBalance: string | null;
   isLoading: boolean;
+  networkInfo: any;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
-  simulateTransfer: (to: string, amount: string) => Promise<string>;
+  transferCUSD: (to: string, amount: string) => Promise<string>;
+  refreshBalances: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -17,19 +21,36 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
-  const [balance, setBalance] = useState<string | null>(null);
+  const [cUSDBalance, setCUSDBalance] = useState<string | null>(null);
+  const [celoBalance, setCeloBalance] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [networkInfo] = useState(celoWalletService.getCurrentNetwork());
   const { toast } = useToast();
+
+  const refreshBalances = async () => {
+    if (!address) return;
+    
+    try {
+      const [cUSD, celo] = await Promise.all([
+        celoWalletService.getCUSDBalance(address),
+        celoWalletService.getCELOBalance(address)
+      ]);
+      setCUSDBalance(cUSD);
+      setCeloBalance(celo);
+    } catch (error) {
+      console.error('Failed to refresh balances:', error);
+    }
+  };
 
   const connectWallet = async () => {
     setIsLoading(true);
     try {
-      const walletAddress = await walletService.connectMetaMask();
+      const walletAddress = await celoWalletService.connectWallet();
       setAddress(walletAddress);
       setIsConnected(true);
       
-      // Get balance (mock balance for demo)
-      setBalance('1250.50');
+      // Get balances
+      await refreshBalances();
       
       toast({
         title: "Wallet Connected",
@@ -48,10 +69,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   const disconnectWallet = () => {
-    walletService.disconnect();
+    celoWalletService.disconnect();
     setIsConnected(false);
     setAddress(null);
-    setBalance(null);
+    setCUSDBalance(null);
+    setCeloBalance(null);
     
     toast({
       title: "Wallet Disconnected",
@@ -59,19 +81,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const simulateTransfer = async (to: string, amount: string): Promise<string> => {
+  const transferCUSD = async (to: string, amount: string): Promise<string> => {
     if (!isConnected) {
       throw new Error('Wallet not connected');
     }
     
     setIsLoading(true);
     try {
-      const txHash = await walletService.simulateTransfer(to, amount);
+      const txHash = await celoWalletService.transferCUSD(to, amount);
       
-      // Update balance after transfer (mock)
-      const currentBalance = parseFloat(balance || '0');
-      const transferAmount = parseFloat(amount);
-      setBalance((currentBalance - transferAmount).toString());
+      // Refresh balances after transfer
+      await refreshBalances();
       
       toast({
         title: "Transaction Successful",
@@ -95,13 +115,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check if wallet is already connected
     const checkConnection = async () => {
-      if (window.ethereum) {
+      if (window.ethereum || window.celo) {
         try {
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts.length > 0) {
+          const walletProvider = window.celo || window.ethereum;
+          const accounts = await walletProvider.request({ method: 'eth_accounts' });
+          if (accounts && accounts.length > 0) {
             setAddress(accounts[0]);
             setIsConnected(true);
-            setBalance('1250.50'); // Mock balance
+            await refreshBalances();
           }
         } catch (error) {
           console.error('Failed to check wallet connection:', error);
@@ -118,6 +139,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       } else {
         setAddress(accounts[0]);
         setIsConnected(true);
+        refreshBalances();
       }
     };
 
@@ -125,11 +147,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       window.location.reload();
     };
 
-    walletService.onAccountsChanged(handleAccountsChanged);
-    walletService.onChainChanged(handleChainChanged);
+    celoWalletService.onAccountsChanged(handleAccountsChanged);
+    celoWalletService.onChainChanged(handleChainChanged);
 
     return () => {
-      walletService.removeAllListeners();
+      celoWalletService.removeAllListeners();
     };
   }, []);
 
@@ -138,11 +160,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       value={{
         isConnected,
         address,
-        balance,
+        cUSDBalance,
+        celoBalance,
         isLoading,
+        networkInfo,
         connectWallet,
         disconnectWallet,
-        simulateTransfer,
+        transferCUSD,
+        refreshBalances,
       }}
     >
       {children}

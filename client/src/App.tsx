@@ -6,13 +6,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { GroupProvider } from "@/contexts/GroupContext";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
+import { ChatBot } from "@/components/ChatBot";
+import LandingPage from "@/pages/LandingPage";
 import Dashboard from "@/pages/Dashboard";
 import GroupDetail from "@/pages/GroupDetail";
 import CreateGroup from "@/pages/CreateGroup";
 import JoinGroup from "@/pages/JoinGroup";
 import NotFound from "@/pages/not-found";
 import { Users } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useRoute } from "wouter";
 
 function Header() {
   const [location] = useLocation();
@@ -22,7 +24,7 @@ function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center">
+            <Link href="/dashboard" className="flex items-center">
               <h1 className="text-2xl font-bold text-primary flex items-center">
                 <Users className="mr-2 h-6 w-6" />
                 StableCircle
@@ -30,9 +32,9 @@ function Header() {
             </Link>
             <nav className="hidden md:ml-10 md:flex space-x-8">
               <Link 
-                href="/" 
+                href="/dashboard" 
                 className={`font-medium transition-colors ${
-                  location === '/' ? 'text-primary' : 'text-gray-500 hover:text-primary'
+                  location === '/dashboard' ? 'text-primary' : 'text-gray-500 hover:text-primary'
                 }`}
               >
                 Dashboard
@@ -86,12 +88,20 @@ function Footer() {
 }
 
 function Router() {
+  const [, params] = useRoute("/");
+  const [location] = useLocation();
+  
+  // Show landing page on root, dashboard for logged in users
+  if (location === "/") {
+    return <LandingPage />;
+  }
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main className="flex-1">
         <Switch>
-          <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/group/:id" component={GroupDetail} />
           <Route path="/create" component={CreateGroup} />
           <Route path="/join" component={JoinGroup} />
@@ -109,8 +119,9 @@ function App() {
       <TooltipProvider>
         <WalletProvider>
           <GroupProvider>
-            <Toaster />
             <Router />
+            <ChatBot />
+            <Toaster />
           </GroupProvider>
         </WalletProvider>
       </TooltipProvider>
