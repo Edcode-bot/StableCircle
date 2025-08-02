@@ -17,6 +17,7 @@ export interface CeloWalletProvider {
   request: (args: { method: string; params?: any[] }) => Promise<any>;
   on: (event: string, handler: (data: any) => void) => void;
   removeListener: (event: string, handler: (data: any) => void) => void;
+  enable?: () => Promise<string[]>;
 }
 
 declare global {
@@ -33,20 +34,69 @@ export class CeloWalletService {
 
   async connectWallet(): Promise<string> {
     try {
-      // Try Celo extension first, then fallback to MetaMask
-      const walletProvider = window.celo || window.ethereum;
+      // Check if running on mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      if (!walletProvider) {
-        throw new Error('Please install MetaMask or Celo Extension Wallet');
-      }
-
-      // Request account access
-      const accounts = await walletProvider.request({
-        method: 'eth_requestAccounts',
+      console.log('Connecting wallet...', { 
+        isMobile, 
+        hasCelo: !!window.celo, 
+        hasEthereum: !!window.ethereum,
+        userAgent: navigator.userAgent
       });
-
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found');
+      
+      let walletProvider: any = null;
+      let accounts: string[] = [];
+      
+      // Try Celo wallet first (Valora mobile app)
+      if (window.celo) {
+        try {
+          console.log('Attempting Celo wallet connection...');
+          
+          // For Valora, try the enable method first
+          if (typeof window.celo.enable === 'function') {
+            accounts = await window.celo.enable();
+          } else {
+            // Fallback to eth_requestAccounts
+            accounts = await window.celo.request({
+              method: 'eth_requestAccounts',
+            });
+          }
+          
+          console.log('Celo wallet accounts:', accounts);
+          
+          if (accounts && accounts.length > 0) {
+            walletProvider = window.celo;
+          }
+        } catch (celoError) {
+          console.log('Celo wallet connection failed:', celoError);
+        }
+      }
+      
+      // Fallback to Ethereum (MetaMask)
+      if (!walletProvider && window.ethereum) {
+        try {
+          console.log('Attempting Ethereum wallet connection...');
+          accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+          console.log('Ethereum wallet accounts:', accounts);
+          
+          if (accounts && accounts.length > 0) {
+            walletProvider = window.ethereum;
+          }
+        } catch (ethError) {
+          console.log('Ethereum wallet connection failed:', ethError);
+          throw ethError;
+        }
+      }
+      
+      // No wallet available or connection failed
+      if (!walletProvider || !accounts || accounts.length === 0) {
+        if (isMobile) {
+          throw new Error('Please install Valora wallet and refresh the page');
+        } else {
+          throw new Error('Please install MetaMask browser extension');
+        }
       }
 
       // Initialize provider and signer
@@ -66,11 +116,23 @@ export class CeloWalletService {
       return accounts[0];
     } catch (error) {
       console.error('Failed to connect wallet:', error);
-      throw new Error(
-        error instanceof Error 
-          ? error.message 
-          : 'Failed to connect to wallet'
-      );
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to connect wallet';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('User rejected') || error.message.includes('denied')) {
+          errorMessage = 'Connection rejected by user';
+        } else if (error.message.includes('No accounts')) {
+          errorMessage = 'No wallet accounts found. Please unlock your wallet';
+        } else if (error.message.includes('install')) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
   }
 
@@ -159,7 +221,7 @@ export class CeloWalletService {
       const senderAddress = await this.signer.getAddress();
       const balance = await this.cUSDContract.balanceOf(senderAddress);
       
-      if (balance < amountWei) {
+      if (Number(balance) < Number(amountWei)) {
         throw new Error('Insufficient cUSD balance');
       }
 

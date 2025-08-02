@@ -3,6 +3,7 @@ import { celoWalletService } from '@/lib/celo';
 import { useToast } from '@/hooks/use-toast';
 import { APP_CONFIG } from '@/config/constants';
 import { storageService } from '@/lib/storage';
+import { MobileWalletGuide } from '@/components/MobileWalletGuide';
 
 interface WalletContextType {
   isConnected: boolean;
@@ -67,11 +68,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error('Failed to connect wallet:', error);
-      toast({
-        title: "Connection Failed",
-        description: error instanceof Error ? error.message : "Failed to connect wallet",
-        variant: "destructive",
-      });
+      
+      // Check if mobile browser issue
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile && (!window.celo && !window.ethereum)) {
+        toast({
+          title: "Mobile Wallet Required",
+          description: "Please use Valora's built-in browser or install MetaMask mobile",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Connection Failed",
+          description: error instanceof Error ? error.message : "Failed to connect wallet",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
