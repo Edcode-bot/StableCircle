@@ -17,14 +17,12 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: Tailwind CSS with custom CSS variables for theming and responsive design
 - **State Management**: React Context API for global state (WalletContext, GroupContext)
 - **Forms**: React Hook Form with Zod validation for type-safe form handling
-- **Build System**: Vite configured to output static files to `dist/public/` for cloud deployment
 
 ### Backend Architecture
-- **Development**: Express.js with TypeScript for local development
-- **Production**: Serverless functions architecture for cloud deployment
-- **API Endpoints**: `/api/chat` endpoint converted to serverless function at `api/chat.ts`
+- **Server Framework**: Express.js with TypeScript
+- **Development Setup**: Vite for fast development builds and hot module replacement
 - **Storage Strategy**: Currently using localStorage with a migration path to database storage
-- **Cloud Ready**: Configured for Vercel, Netlify, and other static hosting platforms
+- **API Structure**: RESTful API endpoints under `/api` prefix (framework in place)
 
 ### Data Storage Solutions
 - **Current**: LocalStorageService class for client-side persistence
@@ -74,9 +72,6 @@ Preferred communication style: Simple, everyday language.
 - **React Hook Form**: Form state management and validation
 
 ### Deployment and Infrastructure
-- **Cloud Platforms**: Ready for Vercel, Netlify, and other static hosting services
-- **Serverless Functions**: API endpoints deployed as individual cloud functions
-- **Static Assets**: Frontend served from global CDN for optimal performance
-- **Environment Variables**: Secure configuration management for API keys
-- **Git-Based Deployment**: Automated deployment from GitHub repository
-- **Build Configuration**: `vercel.json` and deployment guides included
+- **Vercel**: Deployment platform (Vercel-ready configuration)
+- **Replit**: Development environment integration with runtime error overlay
+- **Connect PG Simple**: PostgreSQL session store for production deployment
