@@ -159,7 +159,7 @@ export class CeloWalletService {
       const senderAddress = await this.signer.getAddress();
       const balance = await this.cUSDContract.balanceOf(senderAddress);
       
-      if (balance.lt(amountWei)) {
+      if (balance < amountWei) {
         throw new Error('Insufficient cUSD balance');
       }
 

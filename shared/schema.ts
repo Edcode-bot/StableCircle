@@ -44,12 +44,25 @@ export const userSchema = z.object({
   totalEarned: z.number(),
   totalContributed: z.number(),
   referrals: z.number(),
+  referredBy: z.string().optional(),
+  createdAt: z.string(),
+});
+
+export const referralSchema = z.object({
+  id: z.string(),
+  referrerAddress: z.string(),
+  referredAddress: z.string(),
+  referralCode: z.string(),
+  rewardAmount: z.number(),
+  status: z.enum(['pending', 'completed']),
+  createdAt: z.string(),
 });
 
 export type Group = z.infer<typeof groupSchema>;
 export type Member = z.infer<typeof memberSchema>;
 export type Contribution = z.infer<typeof contributionSchema>;
 export type User = z.infer<typeof userSchema>;
+export type Referral = z.infer<typeof referralSchema>;
 
 export const createGroupSchema = groupSchema.pick({
   name: true,

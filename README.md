@@ -14,16 +14,19 @@ A production-ready Web3 decentralized application (dApp) that enables users to f
 - **SEO Optimized**: Complete meta tags, Open Graph, Twitter Cards, and structured data
 - **Mobile-First Design**: Responsive UI optimized for mobile and desktop
 - **AI Chatbot**: OpenAI-powered assistant for user support and guidance
-- **Referral System**: Earn 5 cUSD for successful referrals
-- **Streak Rewards**: 2 cUSD bonus for consistent saving patterns
+- **Referral System**: Earn 5 cUSD for successful referrals with unique referral codes
+- **Leaderboard**: Community rankings by referrals and contributions
 - **Landing Page**: Professional marketing page with FAQ and video integration
 
 ### Technical Features
 - **Real Blockchain Transactions**: Integrated with Celo network for actual cUSD transfers
+- **Mock Transaction Mode**: Development-friendly transaction simulation for testing
 - **Network Auto-Detection**: Automatically switches to correct Celo network
 - **Balance Tracking**: Real-time cUSD and CELO balance display
 - **Transaction History**: Explorer links for all blockchain transactions
 - **Error Handling**: Comprehensive error management and user feedback
+- **TypeScript**: Full type safety throughout the application
+- **Testing**: Comprehensive test coverage for core functionality
 
 ## 🚀 Quick Start
 
@@ -37,11 +40,21 @@ A production-ready Web3 decentralized application (dApp) that enables users to f
 # Install dependencies
 npm install
 
+# Configure environment variables
+cp .env.example .env
+# Edit .env with your API keys and configuration
+
 # Start the development server
 npm run dev
 ```
 
 The app will be available at `http://localhost:5000`
+
+### Environment Configuration
+Create a `.env` file from `.env.example` and configure:
+- `VITE_USE_MOCK_TX=true` for development with mock transactions
+- `VITE_CELO_NETWORK=alfajores` for testnet
+- `OPENAI_API_KEY=your_key` for chatbot functionality
 
 ### Wallet Setup
 1. Install MetaMask or Valora wallet

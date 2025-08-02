@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { celoWalletService } from '@/lib/celo';
 import { useToast } from '@/hooks/use-toast';
 import { APP_CONFIG } from '@/config/constants';
+import { storageService } from '@/lib/storage';
 
 interface WalletContextType {
   isConnected: boolean;
@@ -13,6 +14,7 @@ interface WalletContextType {
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   transferCUSD: (to: string, amount: string) => Promise<string>;
+  simulateTransfer: (to: string, amount: string) => Promise<string>;
   refreshBalances: () => Promise<void>;
 }
 
@@ -51,6 +53,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       
       // Get balances
       await refreshBalances();
+      
+      // Handle referral tracking
+      const pendingReferral = localStorage.getItem('pendingReferral');
+      storageService.createOrGetUser(walletAddress, undefined, pendingReferral || undefined);
+      if (pendingReferral) {
+        localStorage.removeItem('pendingReferral');
+      }
       
       toast({
         title: "Wallet Connected",
@@ -112,6 +121,30 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const simulateTransfer = async (to: string, amount: string): Promise<string> => {
+    if (!isConnected) {
+      throw new Error('Wallet not connected');
+    }
+    
+    try {
+      // Use mock transactions in development, real transactions in production
+      const useMockTx = APP_CONFIG.USE_MOCK_TX;
+      
+      if (useMockTx) {
+        // Simulate transaction delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`;
+        console.log(`Simulated transfer of ${amount} cUSD to ${to}`);
+        return mockTxHash;
+      } else {
+        return await transferCUSD(to, amount);
+      }
+    } catch (error) {
+      console.error('Simulate transfer failed:', error);
+      throw error;
+    }
+  };
+
   useEffect(() => {
     // Check if wallet is already connected
     const checkConnection = async () => {
@@ -167,6 +200,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         connectWallet,
         disconnectWallet,
         transferCUSD,
+        simulateTransfer,
         refreshBalances,
       }}
     >

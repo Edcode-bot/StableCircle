@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { GroupProvider } from "@/contexts/GroupContext";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
@@ -12,6 +13,7 @@ import Dashboard from "@/pages/Dashboard";
 import GroupDetail from "@/pages/GroupDetail";
 import CreateGroup from "@/pages/CreateGroup";
 import JoinGroup from "@/pages/JoinGroup";
+import Leaderboard from "@/pages/Leaderboard";
 import NotFound from "@/pages/not-found";
 import { Users } from "lucide-react";
 import { Link, useLocation, useRoute } from "wouter";
@@ -91,6 +93,15 @@ function Router() {
   const [, params] = useRoute("/");
   const [location] = useLocation();
   
+  // Check for referral code in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('pendingReferral', refCode);
+    }
+  }, []);
+  
   // Show landing page on root, dashboard for logged in users
   if (location === "/") {
     return <LandingPage />;
@@ -105,6 +116,7 @@ function Router() {
           <Route path="/group/:id" component={GroupDetail} />
           <Route path="/create" component={CreateGroup} />
           <Route path="/join" component={JoinGroup} />
+          <Route path="/leaderboard" component={Leaderboard} />
           <Route component={NotFound} />
         </Switch>
       </main>

@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, BrowserProvider, formatEther } from 'ethers';
 
 export interface WalletProvider {
   request: (args: { method: string; params?: any[] }) => Promise<any>;
@@ -13,8 +13,8 @@ declare global {
 }
 
 export class WalletService {
-  private provider: ethers.providers.Web3Provider | null = null;
-  private signer: ethers.Signer | null = null;
+  private provider: BrowserProvider | null = null;
+  private signer: any | null = null;
 
   async connectMetaMask(): Promise<string> {
     if (!window.ethereum) {
@@ -26,8 +26,8 @@ export class WalletService {
         method: 'eth_requestAccounts',
       });
 
-      this.provider = new ethers.providers.Web3Provider(window.ethereum);
-      this.signer = this.provider.getSigner();
+      this.provider = new BrowserProvider(window.ethereum);
+      this.signer = await this.provider.getSigner();
 
       return accounts[0];
     } catch (error) {
@@ -42,7 +42,7 @@ export class WalletService {
 
     try {
       const balance = await this.provider.getBalance(address);
-      return ethers.utils.formatEther(balance);
+      return formatEther(balance);
     } catch (error) {
       throw new Error('Failed to get balance');
     }

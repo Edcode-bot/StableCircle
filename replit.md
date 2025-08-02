@@ -1,77 +1,85 @@
-# StableCircle - Web3 Group Savings dApp
+# StableCircle dApp Development
 
-## Overview
-
-StableCircle is a Web3 decentralized application (dApp) that enables users to form rotating savings and credit associations (ROSCAs) using stablecoins. The platform facilitates group savings where members contribute fixed amounts over time, with payouts rotating among participants. Built as a modern React application with Web3 integration, it provides a complete savings circle management system with wallet connectivity, group creation, member management, and contribution tracking.
+## Project Overview
+StableCircle is a production-ready Web3 decentralized application (dApp) that enables users to form rotating savings and credit associations (ROSCAs) using cUSD stablecoins on the Celo blockchain. The application combines traditional savings circles with modern blockchain technology for transparency and security.
 
 ## User Preferences
+- Keep existing LandingPage and ChatBot components intact - do not overwrite them
+- Use localStorage for now, but prepare Firebase structure for future scaling
+- Support MetaMask, WalletConnect, and Valora wallets on Celo network
+- USE_MOCK_TX flag to toggle between real and mock transactions for development
 
-Preferred communication style: Simple, everyday language.
+## Recent Changes (Latest First)
 
-## System Architecture
+### December 2024 - Core Web3 Implementation
+- ✓ Enhanced environment variable configuration with .env.example
+- ✓ Added comprehensive referral system with tracking and rewards
+- ✓ Created Leaderboard page for community rankings
+- ✓ Implemented ContributionModal with transaction status tracking  
+- ✓ Added mock transaction testing framework
+- ✓ Enhanced WalletContext with referral integration
+- ✓ Fixed ethers.js v6 compatibility issues
+- ✓ Added comprehensive storage service for referrals and user management
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript for type safety and modern development practices
-- **Routing**: Wouter for lightweight client-side routing
-- **UI Components**: shadcn/ui component library built on Radix UI primitives for accessible, consistent design
-- **Styling**: Tailwind CSS with custom CSS variables for theming and responsive design
-- **State Management**: React Context API for global state (WalletContext, GroupContext)
-- **Forms**: React Hook Form with Zod validation for type-safe form handling
+## Project Architecture
 
-### Backend Architecture
-- **Server Framework**: Express.js with TypeScript
-- **Development Setup**: Vite for fast development builds and hot module replacement
-- **Storage Strategy**: Currently using localStorage with a migration path to database storage
-- **API Structure**: RESTful API endpoints under `/api` prefix (framework in place)
+### Frontend Stack
+- **React 18** with TypeScript for type safety
+- **Tailwind CSS** with shadcn/ui components for styling
+- **Wouter** for client-side routing
+- **React Query** for server state management
+- **Ethers.js v6** for Celo blockchain interaction
 
-### Data Storage Solutions
-- **Current**: LocalStorageService class for client-side persistence
-- **Future**: Drizzle ORM configured for PostgreSQL database migration
-- **Schema**: Zod schemas for runtime type validation and data integrity
-- **Data Models**: Groups, Members, Contributions, and Users with relational structure
+### Backend Services
+- **Express.js** server for API endpoints
+- **Local Storage** for development data persistence
+- **Firebase** ready for production scaling
 
-### Web3 Integration
-- **Wallet Connection**: MetaMask and WalletConnect support via ethers.js
-- **Transaction Simulation**: Mock stablecoin transactions for development and testing
-- **Provider Management**: Web3Provider abstraction for wallet interactions
-- **Balance Tracking**: Real-time wallet balance monitoring
+### Web3 Configuration
+- **Celo Networks**: Alfajores testnet and mainnet support
+- **Wallet Integration**: MetaMask, Valora, WalletConnect
+- **Token Support**: cUSD (Celo USD) stablecoin
+- **Mock Transactions**: Configurable for development/testing
 
-### Authentication and Authorization
-- **Web3 Authentication**: Wallet-based authentication using connected wallet addresses
-- **Session Management**: Wallet connection state persisted across sessions
-- **Authorization**: Role-based access within groups (admin/member permissions)
+### Key Components
+- `WalletContext`: Wallet connection and transaction management
+- `GroupContext`: Group savings logic and state management
+- `ContributionModal`: Transaction interface with status tracking
+- `ReferralSection`: Referral system with rewards tracking
+- `Leaderboard`: Community rankings and statistics
+- `ChatBot`: AI-powered user assistance (OpenAI integration)
 
-### Component Architecture
-- **Modular Design**: Reusable components for group management, wallet interactions, and forms
-- **Context Providers**: Centralized state management for wallet and group data
-- **Custom Hooks**: useCountdown for real-time timers, useToast for notifications
-- **Modal System**: Dialog-based interactions for contributions, group creation, and joining
+### Data Models
+- **User**: Wallet address, referral codes, earnings, contributions
+- **Group**: Savings circle configuration and metadata
+- **Contribution**: Individual savings transactions
+- **Referral**: Referral tracking and reward distribution
 
-## External Dependencies
+### Environment Variables
+```
+VITE_CELO_NETWORK=alfajores
+VITE_CUSD_ADDRESS=0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
+VITE_USE_MOCK_TX=true
+OPENAI_API_KEY=your_openai_api_key
+```
 
-### Web3 Services
-- **MetaMask**: Primary wallet provider for Web3 transactions
-- **WalletConnect**: Alternative wallet connection protocol
-- **Ethers.js**: Ethereum interaction library for wallet operations and transaction handling
+## Development Guidelines
+- Use TypeScript throughout the application
+- Follow React best practices with hooks and context
+- Implement comprehensive error handling
+- Maintain responsive mobile-first design
+- Use environment variables for configuration
+- Test with mock transactions before mainnet deployment
 
-### Database and Storage
-- **Neon Database**: PostgreSQL database service (configured via DATABASE_URL)
-- **Drizzle ORM**: Type-safe database toolkit for PostgreSQL operations
-- **LocalStorage**: Browser storage for development and offline functionality
+## Testing Strategy
+- Mock transaction simulation for development
+- Unit tests for core business logic
+- Integration tests for wallet connectivity
+- End-to-end testing for user flows
 
-### UI and Development Tools
-- **Radix UI**: Headless UI components for accessibility and customization
-- **Tailwind CSS**: Utility-first CSS framework for styling
-- **Vite**: Build tool and development server
-- **React Query**: Server state management and caching (configured but not actively used)
-
-### Utility Libraries
-- **Day.js**: Date manipulation and formatting with duration and relative time plugins
-- **Zod**: Runtime type validation and schema definition
-- **Nanoid**: Unique ID generation for entities
-- **React Hook Form**: Form state management and validation
-
-### Deployment and Infrastructure
-- **Vercel**: Deployment platform (Vercel-ready configuration)
-- **Replit**: Development environment integration with runtime error overlay
-- **Connect PG Simple**: PostgreSQL session store for production deployment
+## Future Enhancements
+- Smart contract deployment for automated payouts
+- Firebase integration for production data persistence
+- Multi-language support
+- Advanced analytics and reporting
+- Mobile app development (React Native)

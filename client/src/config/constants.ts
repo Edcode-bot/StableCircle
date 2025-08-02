@@ -1,7 +1,7 @@
 // Production configuration constants
 export const APP_CONFIG = {
   // Toggle between mock and real transactions
-  USE_MOCK_TX: process.env.NODE_ENV === 'development' ? true : false,
+  USE_MOCK_TX: import.meta.env.VITE_USE_MOCK_TX === 'false' ? false : true,
   
   // Celo Network Configuration
   CELO_NETWORKS: {
@@ -10,7 +10,7 @@ export const APP_CONFIG = {
       name: 'Celo Alfajores Testnet',
       rpcUrl: 'https://alfajores-forno.celo-testnet.org',
       explorerUrl: 'https://explorer.celo.org/alfajores',
-      cUSD: '0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1',
+      cUSD: import.meta.env.VITE_CUSD_ADDRESS || '0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1',
       nativeCurrency: {
         name: 'Celo',
         symbol: 'CELO',
@@ -22,7 +22,7 @@ export const APP_CONFIG = {
       name: 'Celo Mainnet',
       rpcUrl: 'https://forno.celo.org',
       explorerUrl: 'https://explorer.celo.org/mainnet',
-      cUSD: '0x765DE816845861e75A25fCA122bb6898B8B1282a',
+      cUSD: import.meta.env.VITE_CUSD_ADDRESS || '0x765DE816845861e75A25fCA122bb6898B8B1282a',
       nativeCurrency: {
         name: 'Celo',
         symbol: 'CELO',
@@ -31,8 +31,8 @@ export const APP_CONFIG = {
     },
   },
   
-  // Current network (use ALFAJORES for development)
-  CURRENT_NETWORK: 'ALFAJORES' as 'ALFAJORES' | 'MAINNET',
+  // Current network - configurable via environment variable
+  CURRENT_NETWORK: (import.meta.env.VITE_CELO_NETWORK?.toUpperCase() || 'ALFAJORES') as 'ALFAJORES' | 'MAINNET',
   
   // App URLs
   BASE_URL: 'https://stablecircle.vercel.app',
