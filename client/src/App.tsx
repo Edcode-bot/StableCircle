@@ -8,8 +8,10 @@ import { WalletProvider } from "@/contexts/WalletContext";
 import { GroupProvider } from "@/contexts/GroupContext";
 import { WalletConnectButton } from "@/components/WalletConnectButton";
 import { ChatBot } from "@/components/ChatBot";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import LandingPage from "@/pages/LandingPage";
 import Dashboard from "@/pages/Dashboard";
+import MobileDashboard from "@/pages/MobileDashboard";
 import GroupDetail from "@/pages/GroupDetail";
 import CreateGroup from "@/pages/CreateGroup";
 import JoinGroup from "@/pages/JoinGroup";
@@ -121,7 +123,7 @@ function Router() {
       <main className="flex-1">
         <Switch>
           <Route path="/dashboard" component={Dashboard} />
-          <Route path="/mobile-dashboard" component={() => import('./pages/MobileDashboard')} />
+          <Route path="/mobile-dashboard" component={MobileDashboard} />
           <Route path="/group/:id" component={GroupDetail} />
           <Route path="/hub/:id" component={GroupDetail} />
           <Route path="/create" component={CreateGroup} />
@@ -139,17 +141,21 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WalletProvider>
-          <GroupProvider>
-            <Router />
-            <ChatBot />
-            <Toaster />
-          </GroupProvider>
-        </WalletProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <WalletProvider>
+            <GroupProvider>
+              <ErrorBoundary>
+                <Router />
+              </ErrorBoundary>
+              <ChatBot />
+              <Toaster />
+            </GroupProvider>
+          </WalletProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

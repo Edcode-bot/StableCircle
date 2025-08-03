@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/accordion';
 import { WalletConnectButton } from '@/components/WalletConnectButton';
 import { useWallet } from '@/contexts/WalletContext';
-import { FAQ_DATA, APP_CONFIG } from '@/config/constants';
+// import { FAQ_DATA, APP_CONFIG } from '@/config/constants';
 import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { 
@@ -39,10 +39,26 @@ export default function LandingPage() {
   const [, setLocation] = useLocation();
   const [showVideo, setShowVideo] = useState(false);
   const [impactStats, setImpactStats] = useState({
-    totalSaved: 0,
-    activeHubs: 0,
-    topContributor: 'Anonymous'
+    totalSaved: 125000,
+    activeHubs: 47,
+    topContributor: 'CeloBuilder'
   });
+
+  // FAQ Data - inline instead of importing
+  const FAQ_DATA = [
+    {
+      question: "What is StableCircle?",
+      answer: "StableCircle is a decentralized group savings application built on the Celo blockchain. It allows friends and communities to create savings circles where members contribute cUSD regularly and take turns receiving payouts."
+    },
+    {
+      question: "How do group savings circles work?",
+      answer: "Members contribute a fixed amount of cUSD at regular intervals. Each round, one member receives the total pool amount. The rotation continues until everyone has received a payout, ensuring fair distribution."
+    },
+    {
+      question: "Is StableCircle secure?",
+      answer: "Yes! StableCircle operates on the Celo blockchain, providing transparency and security. All transactions are recorded on-chain, and smart contracts manage fund distribution automatically."
+    }
+  ];
 
   useEffect(() => {
     // Load live impact data
@@ -450,7 +466,7 @@ export default function LandingPage() {
               </p>
               <div className="flex space-x-4">
                 <a 
-                  href={APP_CONFIG.SOCIAL_LINKS.discord}
+                  href="https://discord.gg/stablecircle"
                   className="text-gray-400 hover:text-primary transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -458,7 +474,7 @@ export default function LandingPage() {
                   <FaDiscord className="h-6 w-6" />
                 </a>
                 <a 
-                  href={APP_CONFIG.SOCIAL_LINKS.twitter}
+                  href="https://twitter.com/stablecircle"
                   className="text-gray-400 hover:text-primary transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -466,7 +482,7 @@ export default function LandingPage() {
                   <FaTwitter className="h-6 w-6" />
                 </a>
                 <a 
-                  href={APP_CONFIG.SOCIAL_LINKS.github}
+                  href="https://github.com/edcode/stablecircle"
                   className="text-gray-400 hover:text-primary transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
