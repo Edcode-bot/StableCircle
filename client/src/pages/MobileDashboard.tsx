@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MobileStats } from '@/components/ui/mobile-stats';
 import { BottomNavigation } from '@/components/ui/bottom-navigation';
+import { EnhancedHubCard } from '@/components/EnhancedHubCard';
+import { GlobalImpactTracker } from '@/components/GlobalImpactTracker';
+import { SmartSuggestions } from '@/components/SmartSuggestions';
 import { useWallet } from '@/contexts/WalletContext';
 import { 
   Users, Plus, MessageCircle, Share2, TrendingUp, 
-  Star, Zap, Trophy, Gift, Clock, ArrowRight 
+  Star, Zap, Trophy, Gift, Clock, ArrowRight, UserPlus 
 } from 'lucide-react';
 import { Link } from 'wouter';
 
@@ -195,34 +198,39 @@ export default function MobileDashboard() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
-                {userHubs.slice(0, 3).map((hub: any) => (
-                  <div 
+              <div className="space-y-4">
+                {userHubs.slice(0, 2).map((hub: any) => (
+                  <EnhancedHubCard
                     key={hub.id}
-                    className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-medium">{hub.name}</h3>
-                      <Badge variant={hub.status === 'active' ? 'default' : 'secondary'}>
-                        {hub.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>${hub.totalSaved} / ${hub.goal}</span>
-                      <span>{Math.round((hub.totalSaved / hub.goal) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full" 
-                        style={{ width: `${Math.min((hub.totalSaved / hub.goal) * 100, 100)}%` }}
-                      />
-                    </div>
-                  </div>
+                    hub={{
+                      id: hub.id,
+                      name: hub.name,
+                      goal: hub.goal || 1000,
+                      deadline: hub.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                      totalSaved: hub.totalSaved || 0,
+                      userContribution: userStats.totalSaved / userHubs.length || 0,
+                      contributionAmount: hub.contributionAmount || 50,
+                      members: hub.members || 1,
+                      maxMembers: hub.maxMembers || 8,
+                      status: hub.status || 'active',
+                      inviteCode: hub.inviteCode || 'ABC123',
+                      userStreak: userStats.currentStreak,
+                      badgeEarned: userStats.badges[0] || undefined,
+                    }}
+                    onContribute={(hubId) => {
+                      // Handle contribution
+                      console.log('Contributing to hub:', hubId);
+                    }}
+                    onViewHistory={(hubId) => {
+                      // Handle view history
+                      console.log('Viewing history for hub:', hubId);
+                    }}
+                  />
                 ))}
-                {userHubs.length > 3 && (
+                {userHubs.length > 2 && (
                   <Button variant="outline" className="w-full" asChild>
                     <Link href="/hubs">
-                      View All Hubs
+                      View All Hubs ({userHubs.length - 2} more)
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
                   </Button>

@@ -33,37 +33,7 @@ export class CeloWalletService {
 
   async connectWallet(): Promise<string> {
     try {
-      // Try Celo extension first, then fallback to MetaMask
-      const walletProvider = window.celo || window.ethereum;
-      
-      if (!walletProvider) {
-        throw new Error('Please install MetaMask or Celo Extension Wallet');
-      }
-
-      // Request account access
-      const accounts = await walletProvider.request({
-        method: 'eth_requestAccounts',
-      });
-
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found');
-      }
-
-      // Initialize provider and signer
-      this.provider = new BrowserProvider(walletProvider);
-      this.signer = await this.provider.getSigner();
-
-      // Check if we're on the correct network
-      await this.switchToCorrectNetwork();
-
-      // Initialize cUSD contract
-      this.cUSDContract = new Contract(
-        NETWORK_CONFIG.cUSD,
-        CUSD_ABI,
-        this.signer
-      );
-
-      return accounts[0];
+      return await this.tryConnectWallet();
     } catch (error) {
       console.error('Failed to connect wallet:', error);
       throw new Error(
@@ -72,6 +42,93 @@ export class CeloWalletService {
           : 'Failed to connect to wallet'
       );
     }
+  }
+
+  private async tryConnectWallet(): Promise<string> {
+    // Method 1: Try Celo extension first
+    if (window.celo) {
+      try {
+        const accounts = await window.celo.request({
+          method: 'eth_requestAccounts',
+        });
+        
+        if (accounts && accounts.length > 0) {
+          await this.initializeProvider(window.celo);
+          console.log('Connected via Celo Extension');
+          return accounts[0];
+        }
+      } catch (error) {
+        console.warn('Celo extension connection failed:', error);
+      }
+    }
+
+    // Method 2: Try MetaMask or other injected wallets
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+        
+        if (accounts && accounts.length > 0) {
+          await this.initializeProvider(window.ethereum);
+          console.log('Connected via MetaMask/Injected wallet');
+          return accounts[0];
+        }
+      } catch (error) {
+        console.warn('MetaMask connection failed:', error);
+      }
+    }
+
+    // Method 3: Check for mobile wallets in-app browsers
+    if (this.isMobile()) {
+      // Check for Valora
+      if ((window as any).valora) {
+        try {
+          const accounts = await (window as any).valora.request({
+            method: 'eth_requestAccounts',
+          });
+          
+          if (accounts && accounts.length > 0) {
+            await this.initializeProvider((window as any).valora);
+            console.log('Connected via Valora');
+            return accounts[0];
+          }
+        } catch (error) {
+          console.warn('Valora connection failed:', error);
+        }
+      }
+
+      // Suggest deep linking for mobile
+      if (!window.ethereum && !window.celo) {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.includes('android')) {
+          throw new Error('Please use MetaMask Mobile, Valora, or another Celo-compatible wallet app.');
+        } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+          throw new Error('Please use MetaMask Mobile, Valora, or another Celo-compatible wallet app from the App Store.');
+        }
+      }
+    }
+
+    throw new Error('No wallet found. Please install MetaMask, Valora, or use a Celo-compatible wallet.');
+  }
+
+  private async initializeProvider(walletProvider: any): Promise<void> {
+    this.provider = new BrowserProvider(walletProvider);
+    this.signer = await this.provider.getSigner();
+
+    // Check if we're on the correct network
+    await this.switchToCorrectNetwork();
+
+    // Initialize cUSD contract
+    this.cUSDContract = new Contract(
+      NETWORK_CONFIG.cUSD,
+      CUSD_ABI,
+      this.signer
+    );
+  }
+
+  private isMobile(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
   async switchToCorrectNetwork(): Promise<void> {
