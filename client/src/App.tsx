@@ -42,20 +42,28 @@ function Header() {
                 Dashboard
               </Link>
               <Link 
-                href="/create" 
+                href="/create-hub" 
                 className={`font-medium transition-colors ${
-                  location === '/create' ? 'text-primary' : 'text-gray-500 hover:text-primary'
+                  location === '/create-hub' ? 'text-primary' : 'text-gray-500 hover:text-primary'
                 }`}
               >
-                Create Group
+                Create Hub
               </Link>
               <Link 
-                href="/join" 
+                href="/join-hub" 
                 className={`font-medium transition-colors ${
-                  location === '/join' ? 'text-primary' : 'text-gray-500 hover:text-primary'
+                  location === '/join-hub' ? 'text-primary' : 'text-gray-500 hover:text-primary'
                 }`}
               >
-                Join Group
+                Join Hub
+              </Link>
+              <Link 
+                href="/leaderboard" 
+                className={`font-medium transition-colors ${
+                  location === '/leaderboard' ? 'text-primary' : 'text-gray-500 hover:text-primary'
+                }`}
+              >
+                Leaderboard
               </Link>
             </nav>
           </div>
@@ -113,9 +121,13 @@ function Router() {
       <main className="flex-1">
         <Switch>
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/mobile-dashboard" component={() => import('./pages/MobileDashboard')} />
           <Route path="/group/:id" component={GroupDetail} />
+          <Route path="/hub/:id" component={GroupDetail} />
           <Route path="/create" component={CreateGroup} />
+          <Route path="/create-hub" component={CreateGroup} />
           <Route path="/join" component={JoinGroup} />
+          <Route path="/join-hub" component={JoinGroup} />
           <Route path="/leaderboard" component={Leaderboard} />
           <Route component={NotFound} />
         </Switch>

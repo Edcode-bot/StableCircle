@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { initializeDatabase } from "./mongodb";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize MongoDB connection (fallback to MemStorage if MongoDB fails)
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      await initializeDatabase();
+      console.log('✅ Using MongoDB for production');
+    } else {
+      console.log('📝 Using MemStorage for development');
+    }
+  } catch (error) {
+    console.warn('⚠️ MongoDB connection failed, falling back to MemStorage:', error.message);
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
